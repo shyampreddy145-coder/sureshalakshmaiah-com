@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CMS Admin | Suresha Lakshmaiah</title>
+  <link rel="stylesheet" href="/src/style.css">
+  <style>
+    body { background: #f4f4f4; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: 'Inter', sans-serif;}
+    .admin-card { background: white; padding: 3rem; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
+    .admin-card h2 { font-size: 1.8rem; margin-bottom: 1rem; }
+    .form-group { margin-bottom: 1.5rem; }
+    label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: #111;}
+    input, textarea, select { width: 100%; padding: 0.8rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;}
+    textarea { height: 180px; font-family: monospace; font-size: 0.9rem;}
+    button { width: 100%; padding: 1rem; background: #dd1818; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; text-transform: uppercase;}
+    button:hover { background: #b01313; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+<!-- Login container -->
+<div class="admin-card" id="login-container">
+  <h2>SureshaLakshmaiah CMS Login</h2>
+  <p style="margin-bottom: 2rem; color: #666;">Authenticate to access the publishing dashboard.</p>
+  <form id="login-form">
+    <div class="form-group"><label>Username</label><input type="text" id="username" required></div>
+    <div class="form-group"><label>Password</label><input type="password" id="password" required></div>
+    <button type="submit">Log In</button>
+  </form>
+</div>
+
+<!-- Dashboard container -->
+<div class="admin-card hidden" id="dashboard-container" style="max-width: 800px; margin: 4rem 0;">
+  <h2>Publish New Insight</h2>
+  <p style="margin-bottom: 2rem; color: #666;">This portal automatically generates secure HTML files and updates the homepage.</p>
+  <form id="post-form">
+    <div class="form-group"><label>Article Title</label><input type="text" id="title" required></div>
+    <div class="form-group"><label>Category Tag</label><input type="text" id="tag" placeholder="e.g. STRATEGY" required></div>
+    <div class="form-group"><label>Cover Image</label><input type="file" id="heroImage" accept="image/*" required></div>
+    <div class="form-group"><label>Content (HTML Formatting)</label>
+      <textarea id="content" placeholder="<p>Write your beautiful content here...</p>&#10;<h2>Sub Header</h2>" required></textarea>
+    </div>
+    <button type="submit" id="post-btn">Publish to Live Site</button>
+    <button type="button" id="logout-btn" style="background: #333; margin-top: 1rem;">Secure Logout</button>
+  </form>
+</div>
+
+<script>
+  let token = localStorage.getItem('cms_token');
+  if (token) {
+    document.getElementById('login-container').classList.add('hidden');
+    document.getElementById('dashboard-container').classList.remove('hidden');
+  }
+
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const u = document.getElementById('username').value;
+    const p = document.getElementById('password').value;
+    
+    try {
+        const res = await fetch('http://localhost:3000/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: u, password: p })
+        });
+        const data = await res.json();
+        if (data.success) {
+          localStorage.setItem('cms_token', data.token);
+          token = data.token;
+          document.getElementById('login-container').classList.add('hidden');
+          document.getElementById('dashboard-container').classList.remove('hidden');
+        } else {
+          alert('Invalid login credentials! Access denied.');
+        }
+    } catch(err) {
+        alert("Failed to connect to backend! Is 'npm run dev' running?");
+    }
+  });
+
+  document.getElementById('post-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('post-btn');
+    btn.textContent = "Publishing...";
+    btn.disabled = true;
+
+    const fd = new FormData();
+    fd.append('title', document.getElementById('title').value);
+    fd.append('tag', document.getElementById('tag').value);
+    fd.append('content', document.getElementById('content').value);
+    fd.append('heroImage', document.getElementById('heroImage').files[0]);
+
+    try {
+      const res = await fetch('http://localhost:3000/api/publish', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token },
+        body: fd
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Successfully published! The system has created your physical files and wired the homepage grid. You will now be redirected.');
+        window.location.href = '/blog/' + data.slug;
+      } else {
+        alert('Server Error: ' + data.error);
+        if(data.error === "Unauthorized") {
+            localStorage.removeItem('cms_token');
+            location.reload();
+        }
+        btn.textContent = "Publish to Live Site";
+        btn.disabled = false;
+      }
+    } catch(e) {
+      alert('Failed to connect to backend server. Make sure node server.js is running alongside Vite.');
+      btn.textContent = "Publish to Live Site";
+      btn.disabled = false;
+    }
+  });
+
+  document.getElementById('logout-btn').addEventListener('click', () => {
+    localStorage.removeItem('cms_token');
+    alert('Logged out successfully.');
+    location.reload();
+  });
+</script>
+</body>
+</html>
