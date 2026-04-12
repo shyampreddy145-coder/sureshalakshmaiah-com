@@ -20,6 +20,14 @@ app.use(express.json());
 // Serve all static files (HTML, CSS, JS, images) from project root
 app.use(express.static(__dirname));
 
+// Bulletproof routing for main pages (handles /privacy as well as /privacy/)
+const mainPages = ['privacy', 'contact', 'blog'];
+mainPages.forEach(page => {
+  app.get(`/${page}`, (req, res) => {
+    res.sendFile(path.join(__dirname, page, 'index.html'));
+  });
+});
+
 // Ensure assets directory exists
 const assetsDir = path.join(__dirname, 'assets');
 if (!fs.existsSync(assetsDir)) fs.mkdirSync(assetsDir, { recursive: true });
