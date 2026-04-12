@@ -58,7 +58,7 @@
     const p = document.getElementById('password').value;
     
     try {
-        const res = await fetch('http://localhost:3000/api/login', {
+        const res = await fetch('/api/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: u, password: p })
@@ -90,7 +90,7 @@
     fd.append('heroImage', document.getElementById('heroImage').files[0]);
 
     try {
-      const res = await fetch('http://localhost:3000/api/publish', {
+      const res = await fetch('/api/publish', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + token },
         body: fd

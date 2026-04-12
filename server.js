@@ -17,6 +17,9 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// Serve all static files (HTML, CSS, JS, images) from project root
+app.use(express.static(__dirname));
+
 // Ensure assets directory exists
 const assetsDir = path.join(__dirname, 'assets');
 if (!fs.existsSync(assetsDir)) fs.mkdirSync(assetsDir, { recursive: true });

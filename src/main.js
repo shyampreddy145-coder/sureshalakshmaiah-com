@@ -6,10 +6,9 @@ initNavbar();
 initFooter();
 
 // ─── Google Analytics ───────────────────────────────────────────
-// To activate: Replace the placeholder ID in your .env file:
-//   VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX  →  your real Measurement ID
+// To activate: Replace 'G-XXXXXXXXXX' below with your real Measurement ID
 // ─────────────────────────────────────────────────────────────────
-const GA_ID = import.meta.env.VITE_GA_MEASUREMENT_ID;
+const GA_ID = 'G-XXXXXXXXXX';
 if (GA_ID && GA_ID !== 'G-XXXXXXXXXX') {
   // Load the gtag.js script
   const script = document.createElement('script');
