@@ -20,6 +20,9 @@ app.use(express.json());
 // Serve all static files (HTML, CSS, JS, images) from project root
 app.use(express.static(__dirname));
 
+// Serve public/ directory at root (mirrors Vite's behavior for favicon, logos, etc.)
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Bulletproof routing for main pages (handles /privacy as well as /privacy/)
 const mainPages = ['privacy', 'contact', 'blog'];
 mainPages.forEach(page => {
